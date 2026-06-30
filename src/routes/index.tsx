@@ -2,19 +2,23 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Clock, Wallet, BookOpen } from "lucide-react";
 import { useSessions, useTeachers } from "@/lib/store";
+import { formatNumber, formatVND } from "@/lib/format";
 import {
-  endOfMonth,
-  endOfWeekMon,
-  formatDateVN,
-  formatNumber,
-  formatVND,
-  startOfMonth,
-  startOfWeekMon,
-  toISODate,
-} from "@/lib/format";
+  REPORT_MONTHS,
+  REPORT_WEEKS,
+  getMonthPeriod,
+  getWeekPeriod,
+} from "@/lib/periods";
 import { computePayroll } from "@/lib/payroll";
 import {
   Table,
@@ -39,26 +43,17 @@ function Index() {
   const teachers = useTeachers();
   const sessions = useSessions();
   const [period, setPeriod] = useState<"week" | "month">("month");
+  const [filterWeek, setFilterWeek] = useState("5");
+  const [filterMonth, setFilterMonth] = useState("6");
 
   const { from, to, label } = useMemo(() => {
-    const now = new Date();
     if (period === "week") {
-      const s = startOfWeekMon(now);
-      const e = endOfWeekMon(now);
-      return {
-        from: toISODate(s),
-        to: toISODate(e),
-        label: `Tuần ${formatDateVN(toISODate(s))} – ${formatDateVN(toISODate(e))}`,
-      };
+      const w = getWeekPeriod(filterWeek);
+      return { from: w.from, to: w.to, label: w.label };
     }
-    const s = startOfMonth(now);
-    const e = endOfMonth(now);
-    return {
-      from: toISODate(s),
-      to: toISODate(e),
-      label: `Tháng ${now.getMonth() + 1}/${now.getFullYear()}`,
-    };
-  }, [period]);
+    const m = getMonthPeriod(filterMonth);
+    return { from: m.from, to: m.to, label: m.label };
+  }, [period, filterWeek, filterMonth]);
 
   const payroll = useMemo(
     () => computePayroll(teachers, sessions, from, to),
@@ -78,79 +73,107 @@ function Index() {
 
   return (
     <AppLayout title="Tổng quan">
-      <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm text-muted-foreground">Kỳ báo cáo</p>
-            <p className="text-lg font-semibold">{label}</p>
-          </div>
-          <Tabs value={period} onValueChange={(v) => setPeriod(v as "week" | "month")}>
-            <TabsList>
-              <TabsTrigger value="week">Theo tuần</TabsTrigger>
-              <TabsTrigger value="month">Theo tháng</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((s) => (
-            <Card key={s.label} className="shadow-sm">
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{s.label}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight">
-                      {s.value}
-                    </p>
+      <div className="flex flex-col gap-3 flex-1 min-h-0">
+        <Card className="shadow-sm shrink-0">
+          <CardContent className="py-3 px-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 justify-between">
+              <div className="flex flex-wrap items-center gap-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">Kỳ báo cáo</p>
+                  <p className="text-sm font-semibold">{label}</p>
+                </div>
+                {period === "week" ? (
+                  <div className="w-44">
+                    <Select value={filterWeek} onValueChange={setFilterWeek}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {REPORT_WEEKS.map((w) => (
+                          <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="rounded-lg bg-accent p-2 text-accent-foreground">
-                    <s.icon className="h-5 w-5" />
+                ) : (
+                  <div className="w-36">
+                    <Select value={filterMonth} onValueChange={setFilterMonth}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {REPORT_MONTHS.map((m) => (
+                          <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+              <Tabs value={period} onValueChange={(v) => setPeriod(v as "week" | "month")}>
+                <TabsList className="h-8">
+                  <TabsTrigger value="week" className="text-xs px-3">Theo tuần</TabsTrigger>
+                  <TabsTrigger value="month" className="text-xs px-3">Theo tháng</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            <div className="mt-2 grid grid-cols-2 lg:grid-cols-4 gap-2">
+              {stats.map((s) => (
+                <div
+                  key={s.label}
+                  className="flex items-center gap-2 rounded-md border bg-muted/30 px-2.5 py-1.5"
+                >
+                  <s.icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <div className="min-w-0">
+                    <p className="text-[11px] leading-tight text-muted-foreground truncate">{s.label}</p>
+                    <p className="text-sm font-semibold tabular-nums leading-tight">{s.value}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-base">Tóm tắt lương từng giáo viên</CardTitle>
+        <Card className="shadow-sm shrink-0">
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-sm font-semibold">Tóm tắt lương từng giáo viên</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 pb-4 pt-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Họ tên</TableHead>
-                    <TableHead className="text-right">Số buổi</TableHead>
-                    <TableHead className="text-right">Tổng giờ</TableHead>
-                    <TableHead className="text-right">Tổng lương</TableHead>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="h-8 py-1">Họ tên</TableHead>
+                    <TableHead className="h-8 py-1 text-right">Giờ ca ngày</TableHead>
+                    <TableHead className="h-8 py-1 text-right">Giờ ca đêm</TableHead>
+                    <TableHead className="h-8 py-1 text-right">Lương ca ngày</TableHead>
+                    <TableHead className="h-8 py-1 text-right">Lương ca đêm</TableHead>
+                    <TableHead className="h-8 py-1 text-right">Tổng lương</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {payroll.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                        Chưa có dữ liệu trong kỳ.
-                      </TableCell>
-                    </TableRow>
-                  )}
                   {payroll.map((p, i) => (
-                    <TableRow key={p.teacher.id} className={i % 2 ? "bg-muted/30" : ""}>
-                      <TableCell className="font-medium">{p.teacher.name}</TableCell>
-                      <TableCell className="text-right tabular-nums">{p.sessionCount}</TableCell>
-                      <TableCell className="text-right tabular-nums">{formatNumber(p.totalHours)}</TableCell>
-                      <TableCell className="text-right tabular-nums font-semibold">{formatVND(p.total)}</TableCell>
+                    <TableRow key={p.teacher.id} className={`${i % 2 ? "bg-muted/30" : ""} hover:bg-muted/50`}>
+                      <TableCell className="py-1.5 font-medium">{p.teacher.name}</TableCell>
+                      <TableCell className="py-1.5 text-right tabular-nums">{formatNumber(p.dayHours)}</TableCell>
+                      <TableCell className="py-1.5 text-right tabular-nums">{formatNumber(p.nightHours)}</TableCell>
+                      <TableCell className="py-1.5 text-right tabular-nums">{formatVND(p.dayAmount)}</TableCell>
+                      <TableCell className="py-1.5 text-right tabular-nums">{formatVND(p.nightAmount)}</TableCell>
+                      <TableCell className="py-1.5 text-right tabular-nums font-semibold">{formatVND(p.total)}</TableCell>
                     </TableRow>
                   ))}
-                  {payroll.length > 0 && (
-                    <TableRow className="border-t-2 font-semibold">
-                      <TableCell>Tổng cộng</TableCell>
-                      <TableCell className="text-right tabular-nums">{totalSessions}</TableCell>
-                      <TableCell className="text-right tabular-nums">{formatNumber(totalHours)}</TableCell>
-                      <TableCell className="text-right tabular-nums text-primary">{formatVND(totalAmount)}</TableCell>
-                    </TableRow>
-                  )}
+                  <TableRow className="border-t-2 font-semibold bg-accent/40 hover:bg-accent/40">
+                    <TableCell className="py-1.5">Tổng cộng</TableCell>
+                    <TableCell className="py-1.5 text-right tabular-nums">
+                      {formatNumber(payroll.reduce((a, b) => a + b.dayHours, 0))}
+                    </TableCell>
+                    <TableCell className="py-1.5 text-right tabular-nums">
+                      {formatNumber(payroll.reduce((a, b) => a + b.nightHours, 0))}
+                    </TableCell>
+                    <TableCell className="py-1.5 text-right tabular-nums">
+                      {formatVND(payroll.reduce((a, b) => a + b.dayAmount, 0))}
+                    </TableCell>
+                    <TableCell className="py-1.5 text-right tabular-nums">
+                      {formatVND(payroll.reduce((a, b) => a + b.nightAmount, 0))}
+                    </TableCell>
+                    <TableCell className="py-1.5 text-right tabular-nums text-primary">{formatVND(totalAmount)}</TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </div>

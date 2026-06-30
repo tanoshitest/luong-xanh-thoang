@@ -57,8 +57,7 @@ export function computePayroll(
         total: dayAmount + nightAmount,
         sessionCount: own.length,
       };
-    })
-    .filter((p) => p.sessionCount > 0 || (teacherId && teacherId !== "all"));
+    });
 }
 
 export function sessionAmount(s: Session, teacher: Teacher | undefined): number {

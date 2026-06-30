@@ -29,7 +29,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="px-2 py-3">
           <div className="text-sm font-semibold text-sidebar-foreground">
-            Trung tâm Giáo dục
+            IKIGAI JSC
           </div>
           <div className="text-xs text-sidebar-foreground/70">
             Báo cáo lương dạy
