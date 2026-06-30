@@ -7,6 +7,11 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  // Cloudflare Pages (ikigai-5kf.pages.dev) needs the pages preset so build output
+  // includes dist/_worker.js — the module preset only produces .output/server (404 on Pages).
+  nitro: {
+    preset: "cloudflare_pages",
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
