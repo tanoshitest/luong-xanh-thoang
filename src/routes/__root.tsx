@@ -81,10 +81,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Quản lý nhật ký đứng lớp và tính lương giáo viên cho trung tâm giáo dục." },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Báo cáo lương dạy" },
-      { property: "og:description", content: "Quản lý nhật ký đứng lớp và tính lương giáo viên." },
+      { property: "og:description", content: "Quản lý nhật ký đứng lớp và tính lương giáo viên cho trung tâm giáo dục." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Báo cáo lương dạy" },
+      { name: "twitter:description", content: "Quản lý nhật ký đứng lớp và tính lương giáo viên cho trung tâm giáo dục." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/912810a4-6605-42cf-a6a1-7fc2f36e65ca/id-preview-0560e85d--60ba30f6-eef0-4f4d-83c6-12f8697178a4.lovable.app-1782813544488.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/912810a4-6605-42cf-a6a1-7fc2f36e65ca/id-preview-0560e85d--60ba30f6-eef0-4f4d-83c6-12f8697178a4.lovable.app-1782813544488.png" },
     ],
     links: [
       {
