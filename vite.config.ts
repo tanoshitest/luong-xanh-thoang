@@ -6,11 +6,17 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+// Cloudflare Pages needs cloudflare_pages; Vercel needs vercel (Build Output API).
+const nitroPreset =
+  process.env.VERCEL || process.env.VERCEL_ENV
+    ? "vercel"
+    : process.env.CF_PAGES || process.env.CF_PAGES_URL
+      ? "cloudflare_pages"
+      : "cloudflare_pages";
+
 export default defineConfig({
-  // Cloudflare Pages (ikigai-5kf.pages.dev) needs the pages preset so build output
-  // includes dist/_worker.js — the module preset only produces .output/server (404 on Pages).
   nitro: {
-    preset: "cloudflare_pages",
+    preset: nitroPreset,
   },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
