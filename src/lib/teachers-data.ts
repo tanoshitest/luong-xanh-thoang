@@ -8,7 +8,7 @@ export const TEACHERS: Teacher[] = [
   { id: "t-hanh", name: "Hạnh", rateDay: 150_000, rateNight: 150_000 },
   { id: "t-man", name: "Mẫn", rateDay: 66_667, rateNight: 110_000 },
   { id: "t-quynh", name: "Quỳnh", rateDay: 66_667, rateNight: 110_000 },
-  { id: "t-chau", name: "Châu", rateDay: 66_667, rateNight: 0 },
+  { id: "t-chau", name: "Châu", rateDay: 66_667, rateNight: 66_667 },
   { id: "t-trong", name: "Trọng", rateDay: 66_667, rateNight: 0 },
   { id: "t-hien", name: "Hiền", rateDay: 56_667, rateNight: 110_000 },
   { id: "t-oanh", name: "Oanh", rateDay: 166_667, rateNight: 120_000 },
