@@ -18,7 +18,9 @@ export const REPORT_MONTHS = Array.from({ length: 12 }, (_, i) => {
     value: String(month),
     label: `Tháng ${month}`,
     from: `${REPORT_YEAR}-${mm}-01`,
-    to: `${REPORT_YEAR}-${mm}-${dd}`,
+    // Kỳ lương "Tháng 6" của trung tâm = tuần 1–5 (1/6 → 5/7), không cắt ở 30/6.
+    // Nếu không, các buổi 1–5/7 thuộc tuần 5 sẽ bị bỏ khỏi báo cáo tháng.
+    to: month === 6 ? REPORT_WEEKS[REPORT_WEEKS.length - 1].to : `${REPORT_YEAR}-${mm}-${dd}`,
   };
 });
 
